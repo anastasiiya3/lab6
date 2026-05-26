@@ -1,0 +1,107 @@
+class RepositoryX:
+    def get_data(self):
+        return "Дані з RepositoryX"
+
+class RepositoryY:
+    def get_info(self):
+        return "Інформація з RepositoryY"
+
+class RepositoryZ:
+    def get_value(self):
+        return "Значення з RepositoryZ"
+
+class ServiceB:
+    def __init__(self, repo_y, repo_z):
+        self.repo_y = repo_y
+        self.repo_z = repo_z
+    
+    def execute(self):
+        print(f"  -> {self.repo_y.get_info()}")
+        print(f"  -> {self.repo_z.get_value()}")
+        print("  -> ServiceB виконано")
+
+class ServiceC:
+    def __init__(self, repo_x, repo_y):
+        self.repo_x = repo_x
+        self.repo_y = repo_y
+    
+    def execute(self):
+        print(f"  -> {self.repo_x.get_data()}")
+        print(f"  -> {self.repo_y.get_info()}")
+        print("  -> ServiceC виконано")
+
+class ServiceA:
+    def __init__(self, service_b, service_c, repo_x):
+        self.service_b = service_b
+        self.service_c = service_c
+        self.repo_x = repo_x
+    
+    def execute(self):
+        print("\n========== ЗАПУСК ServiceA ==========")
+        print("ServiceA викликає ServiceB:")
+        self.service_b.execute()
+        print("\nServiceA викликає ServiceC:")
+        self.service_c.execute()
+        print("\nServiceA використовує RepositoryX:")
+        print(f"  -> {self.repo_x.get_data()}")
+        print("========== ServiceA ЗАВЕРШЕНО ==========")
+
+class DIContainer:
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._init_services()
+        return cls._instance
+    
+    def _init_services(self):
+        repo_x = RepositoryX()
+        repo_y = RepositoryY()
+        repo_z = RepositoryZ()
+        service_b = ServiceB(repo_y, repo_z)
+        service_c = ServiceC(repo_x, repo_y)
+        service_a = ServiceA(service_b, service_c, repo_x)
+        
+        self.services = {
+            'repo_x': repo_x,
+            'repo_y': repo_y,
+            'repo_z': repo_z,
+            'service_b': service_b,
+            'service_c': service_c,
+            'service_a': service_a
+        }
+    
+    def get_service_a(self):
+        return self.services['service_a']
+
+def main():
+    print("=" * 45)
+    print("ЛАБОРАТОРНА РОБОТА №6")
+    print("Впровадження ін'єкції залежності")
+    print("=" * 45)
+    
+    container = DIContainer()
+    service_a = container.get_service_a()
+    service_a.execute()
+    
+    print("\n" + "=" * 45)
+    print("ІЄРАРХІЯ ЗАЛЕЖНОСТЕЙ")
+    print("=" * 45)
+    print("\nРівень 1 (0 залежностей):")
+    print("  - RepositoryX, RepositoryY, RepositoryZ")
+    print("\nРівень 2 (2 залежності):")
+    print("  - ServiceB (залежить від RepositoryY, RepositoryZ)")
+    print("  - ServiceC (залежить від RepositoryX, RepositoryY)")
+    print("\nРівень 3 (3 залежності):")
+    print("  - ServiceA (залежить від ServiceB, ServiceC, RepositoryX)")
+    print("\n" + "=" * 45)
+    print("✅ ВСІ ВИМОГИ ВИКОНАНО:")
+    print("  √ 3-рівнева ієрархія")
+    print("  √ Класи мають 3, 2, 0 залежностей")
+    print("  √ Використано DI контейнер")
+    print("  √ Головна залежність впроваджена в Main")
+    print("=" * 45)
+
+if __name__ == "__main__":
+    main() 
